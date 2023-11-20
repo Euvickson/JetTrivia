@@ -1,6 +1,7 @@
 package br.com.euvickson.jettrivia
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
+                    TriviaHome()
                 }
             }
         }
@@ -40,7 +41,15 @@ fun TriviaHome(viewModel: QuestionsViewModel = hiltViewModel()) {
 
 @Composable
 fun Questions(viewModel: QuestionsViewModel) {
-
+    val questions = viewModel.data.value.data?.toMutableList()
+    if (viewModel.data.value.loading == true) {
+        Log.d("Loading", "Questions: Loading...")
+    } else {
+        Log.d("Loading", "Questions: Loading STOPPED...")
+        questions?.forEach {questionItem ->
+            Log.d("Result", "Questions: ${questionItem.question}")
+        }
+    }
 }
 
 @Preview(showBackground = true)
