@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,9 +50,8 @@ fun Questions(viewModel: QuestionsViewModel) {
         CircularProgressIndicator()
         Log.d("Loading", "Questions: Loading...")
     } else {
-        Log.d("Loading", "Questions: Loading STOPPED...")
-        questions?.forEach {questionItem ->
-            Log.d("Result", "Questions: ${questionItem.question}")
+        if (questions != null) {
+            QuestionDisplay(question = questions.first())
         }
     }
 }
@@ -58,18 +60,21 @@ fun Questions(viewModel: QuestionsViewModel) {
 @Composable
 fun QuestionDisplay(
     question: QuestionItem,
-    questionIndex: MutableState<Int>,
-    viewModel: QuestionsViewModel,
-    onNextClicked: (Int) -> Unit
+//    questionIndex: MutableState<Int>,
+//    viewModel: QuestionsViewModel,
+    onNextClicked: (Int) -> Unit = {}
 ) {
 
     val choicesState = remember (question) {question.choices.toMutableList()}
 
     val answerState = remember (question) {mutableStateOf<Int?>(null)}
 
+    val correctAnswerState = remember (question){ mutableStateOf<Boolean?>(null) }
+
     val updateAnswer: (Int) -> Unit = remember (question) {
         {
             answerState.value = it
+            correctAnswerState.value = choicesState[it] == question.answer
         }
     }
 
@@ -84,7 +89,7 @@ fun QuestionDisplay(
 
             Column {
                 Text(
-                    text = "What's the meaning of all this",
+                    text = question.question,
                     modifier = Modifier
                         .padding(6.dp)
                         .align(alignment = Alignment.Start)
@@ -127,7 +132,15 @@ fun QuestionDisplay(
                             selected = (answerState.value == index)
                             ,onClick = {
                                 updateAnswer(index)
-                            })
+                            }, modifier = Modifier.padding(start = 16.dp),
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = if (correctAnswerState.value == true && index == answerState.value) {
+                                    Color.Green.copy(alpha = 0.2f)
+                                } else {
+                                    Color.Red.copy(alpha = 0.2f)
+                                }
+                            ))
+                        Text(text = answerText)
                     }
                 }
             }
